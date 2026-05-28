@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Бюрократ-хелпер',
-  description: 'Завантажте офіційний документ — отримайте людське пояснення.',
+  description: 'Завантажте офіційний документ - отримайте людське пояснення.',
 }
 
 export default function RootLayout({

@@ -3,7 +3,7 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { extractText } from '@/lib/pdf'
 import { SYSTEM_PROMPT, ANALYSIS_PROMPT } from '@/lib/prompts'
 
-// Force Node.js runtime — required for pdf-parse and Buffer
+// Force Node.js runtime - required for pdf-parse and Buffer
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {

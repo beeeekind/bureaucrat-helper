@@ -60,7 +60,7 @@ Upload an official Ukrainian bureaucratic document (PDF) and get a plain-languag
 1. Запушити репозиторій на GitHub (або GitLab / Bitbucket).
 
 2. Відкрити [vercel.com/new](https://vercel.com/new), обрати репозиторій, натиснути **Deploy**.  
-   Vercel автоматично визначить Next.js — додаткових налаштувань фреймворку не потрібно.
+   Vercel автоматично визначить Next.js - додаткових налаштувань фреймворку не потрібно.
 
 3. **Додати env-змінну до деплою:**  
    У Vercel → Project Settings → **Environment Variables** додати:
@@ -84,7 +84,7 @@ pnpm build && pnpm start
 
 Відкрити [http://localhost:3000](http://localhost:3000).
 
-> `.env.local` не потрапляє на Vercel — env-змінні треба вносити вручну через UI або [Vercel CLI](https://vercel.com/docs/cli): `vercel env add ANTHROPIC_API_KEY`.
+> `.env.local` не потрапляє на Vercel - env-змінні треба вносити вручну через UI або [Vercel CLI](https://vercel.com/docs/cli): `vercel env add ANTHROPIC_API_KEY`.
 
 ## Project structure
 
