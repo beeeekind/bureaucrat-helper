@@ -1,28 +1,48 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { cn } from '@/lib/utils'
 import type { Message } from '@/lib/types'
 
-// ─── Markdown renderer (bold + line breaks) ────────────────────────────────
+// ─── Inline markdown: **bold**, numbered lists, line breaks ────────────────
 
-function Markdown({ text }: { text: string }) {
+function InlineMarkdown({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
   return (
     <>
-      {text.split('\n').map((line, li, arr) => {
-        const parts = line.split(/(\*\*[^*]+\*\*)/g)
+      {parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**') ? (
+          <strong key={i} style={{ color: 'var(--ink)', fontWeight: 600 }}>
+            {p.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
+  )
+}
+
+function Markdown({ text }: { text: string }) {
+  const lines = text.split('\n')
+  return (
+    <>
+      {lines.map((line, li) => {
+        const isLast = li === lines.length - 1
+        const m = line.match(/^(\d+)[.)]\s+(.+)$/)
+        if (m) {
+          return (
+            <span key={li} style={{ display: 'flex', gap: '10px', marginTop: li === 0 ? 0 : '4px' }}>
+              <span style={{ color: 'var(--muted)', flexShrink: 0, fontVariantNumeric: 'tabular-nums', userSelect: 'none' }}>
+                {m[1]}.
+              </span>
+              <span><InlineMarkdown text={m[2]} /></span>
+            </span>
+          )
+        }
         return (
           <span key={li}>
-            {parts.map((part, pi) =>
-              part.startsWith('**') && part.endsWith('**') ? (
-                <strong key={pi} className="font-semibold text-stone-800 dark:text-stone-200">
-                  {part.slice(2, -2)}
-                </strong>
-              ) : (
-                <span key={pi}>{part}</span>
-              )
-            )}
-            {li < arr.length - 1 && <br />}
+            <InlineMarkdown text={line} />
+            {!isLast && <br />}
           </span>
         )
       })}
@@ -34,25 +54,42 @@ function Markdown({ text }: { text: string }) {
 
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1.5 py-1">
+    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 0' }}>
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="h-1 w-1 rounded-full bg-stone-400 dark:bg-stone-600 animate-pulse-dot"
-          style={{ animationDelay: `${i * 0.18}s` }}
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: '50%',
+            backgroundColor: 'var(--dot)',
+            animation: 'pulse-dot 1.1s ease-in-out infinite',
+            animationDelay: `${i * 0.16}s`,
+          }}
         />
       ))}
     </div>
   )
 }
 
-// ─── Message bubble ─────────────────────────────────────────────────────────
+// ─── Message ────────────────────────────────────────────────────────────────
 
 function Bubble({ message }: { message: Message }) {
   if (message.role === 'user') {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[75%] rounded-2xl rounded-tr-sm bg-stone-900 px-4 py-2.5 text-sm leading-relaxed text-stone-50 dark:bg-stone-100 dark:text-stone-900">
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div
+          style={{
+            maxWidth: '72%',
+            backgroundColor: 'var(--bubble-bg)',
+            color: 'var(--bubble-fg)',
+            borderRadius: '18px',
+            borderTopRightRadius: '5px',
+            padding: '10px 16px',
+            fontSize: '14px',
+            lineHeight: '1.55',
+          }}
+        >
           {message.content}
         </div>
       </div>
@@ -60,19 +97,95 @@ function Bubble({ message }: { message: Message }) {
   }
 
   return (
-    <div className="flex justify-start">
-      <div className="max-w-[85%] text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+      <p style={{
+        maxWidth: '85%',
+        fontSize: '14px',
+        lineHeight: '1.75',
+        color: 'var(--ink-2)',
+        margin: 0,
+      }}>
         <Markdown text={message.content} />
-      </div>
+      </p>
     </div>
   )
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
+// ─── Welcome ────────────────────────────────────────────────────────────────
+
+function Welcome({ onFile }: { onFile: () => void }) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '20px',
+        padding: '24px',
+        textAlign: 'center',
+        animation: 'fade-in 0.5s ease-out forwards',
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+        <span
+          style={{
+            fontSize: '13px',
+            fontWeight: 500,
+            letterSpacing: '0.22em',
+            color: 'var(--ink)',
+          }}
+        >
+          SVII
+        </span>
+        <p style={{ fontSize: '13px', color: 'var(--muted)', maxWidth: '200px', lineHeight: '1.6', margin: 0 }}>
+          Ваш помічник з офіційними документами
+        </p>
+      </div>
+
+      <button
+        onClick={onFile}
+        style={{
+          marginTop: '4px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '7px',
+          padding: '8px 16px',
+          borderRadius: '999px',
+          border: '1px solid var(--line)',
+          background: 'transparent',
+          color: 'var(--muted)',
+          fontSize: '12px',
+          cursor: 'pointer',
+          transition: 'color 0.15s, border-color 0.15s',
+          letterSpacing: '0.01em',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.color = 'var(--ink)'
+          e.currentTarget.style.borderColor = 'var(--faint)'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.color = 'var(--muted)'
+          e.currentTarget.style.borderColor = 'var(--line)'
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 1.5h5.5l2.5 2.5V10.5H2V1.5z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
+          <path d="M7.5 1.5v2.5h2.5" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
+        </svg>
+        Завантажити PDF
+      </button>
+    </div>
+  )
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [documentContext, setDocumentContext] = useState<string | null>(null)
+  const [documentName, setDocumentName] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [streaming, setStreaming] = useState('')
@@ -87,47 +200,37 @@ export default function Home() {
   }, [messages, streaming])
 
   async function streamResponse(
-    nextMessages: { role: 'user' | 'assistant'; content: string }[],
-    context: string | null
+    next: { role: 'user' | 'assistant'; content: string }[],
+    ctx: string | null,
   ) {
     setLoading(true)
     setStreaming('')
     setError(null)
-
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: nextMessages,
-          documentContext: context ?? undefined,
-        }),
+        body: JSON.stringify({ messages: next, documentContext: ctx ?? undefined }),
       })
-
       if (!res.ok) {
-        const data = await res.json() as { error: string }
-        setError(data.error === 'missing_api_key' ? 'Сервер не налаштований.' : 'Помилка сервера.')
+        const d = await res.json() as { error: string }
+        setError(d.error === 'missing_api_key' ? 'Сервер не налаштований.' : 'Помилка сервера.')
+        setLoading(false)
         return
       }
-
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
-      let accumulated = ''
-
+      let acc = ''
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        accumulated += decoder.decode(value, { stream: true })
-        setStreaming(accumulated)
+        acc += decoder.decode(value, { stream: true })
+        setStreaming(acc)
       }
-
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: accumulated },
-      ])
+      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: acc }])
       setStreaming('')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Помилка з\'єднання.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Помилка зв\'язку.')
     } finally {
       setLoading(false)
     }
@@ -137,193 +240,242 @@ export default function Home() {
     const text = input.trim()
     if (!text || loading) return
     setInput('')
-
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text }
-    const nextMessages = [...messages, userMsg].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
-    setMessages((prev) => [...prev, userMsg])
-    await streamResponse(nextMessages, documentContext)
+    const next = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }))
+    setMessages(prev => [...prev, userMsg])
+    await streamResponse(next, documentContext)
   }
 
   async function handleFile(file: File) {
-    if (file.type !== 'application/pdf') {
-      setError('Тільки PDF.')
-      return
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Максимум 10 МБ.')
-      return
-    }
-
+    if (file.type !== 'application/pdf') { setError('Тільки PDF.'); return }
+    if (file.size > 10 * 1024 * 1024) { setError('Максимум 10 МБ.'); return }
     setError(null)
     setLoading(true)
-
-    // Step 1: extract text
-    const formData = new FormData()
-    formData.append('file', file)
-
+    const fd = new FormData()
+    fd.append('file', file)
     let docText: string
     try {
-      const res = await fetch('/api/extract', { method: 'POST', body: formData })
+      const res = await fetch('/api/extract', { method: 'POST', body: fd })
       if (!res.ok) {
-        const data = await res.json() as { error: string }
-        setError(
-          data.error === 'no_text'
-            ? 'PDF без тексту - можливо, це скан.'
-            : 'Не вдалося прочитати PDF.'
-        )
+        const d = await res.json() as { error: string }
+        setError(d.error === 'no_text' ? 'PDF без тексту - можливо, це скан.' : 'Не вдалося прочитати PDF.')
         setLoading(false)
         return
       }
-      const data = await res.json() as { text: string }
-      docText = data.text
+      const d = await res.json() as { text: string }
+      docText = d.text
     } catch {
       setError('Помилка завантаження.')
       setLoading(false)
       return
     }
-
     setDocumentContext(docText)
+    setDocumentName(file.name)
     setLoading(false)
-
-    // Step 2: send initial message
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: `📎 ${file.name}`,
-    }
-    const assistantInstruction = {
-      role: 'user' as const,
-      content: `📎 ${file.name} — проаналізуй цей документ і поясни що мені треба знати.`,
-    }
-    setMessages((prev) => [...prev, userMsg])
-    await streamResponse([assistantInstruction], docText)
+    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: `📎 ${file.name}` }
+    const apiMsg = { role: 'user' as const, content: `📎 ${file.name} - проаналізуй цей документ і поясни що мені треба знати.` }
+    setMessages(prev => [...prev, userMsg])
+    await streamResponse([apiMsg], docText)
   }
 
   function handleReset() {
     setMessages([])
     setDocumentContext(null)
+    setDocumentName(null)
     setStreaming('')
     setInput('')
     setError(null)
   }
 
   const isEmpty = messages.length === 0 && !loading
+  const placeholder = documentContext ? 'Задайте питання про документ...' : 'Питання або PDF...'
 
   return (
-    <div className="flex h-screen flex-col bg-stone-50 dark:bg-[#111110]">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', backgroundColor: 'var(--bg)', color: 'var(--ink)' }}>
 
       {/* Header */}
-      <header className="flex shrink-0 items-center justify-between border-b border-stone-100 px-5 py-4 dark:border-stone-800/60">
-        <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
-          Бюрократ-хелпер
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 20px',
+        height: '52px',
+        borderBottom: '1px solid var(--line)',
+        flexShrink: 0,
+      }}>
+        <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: 'var(--ink)' }}>
+          SVII
         </span>
         {!isEmpty && (
           <button
             onClick={handleReset}
-            className="text-xs text-stone-400 transition-colors hover:text-stone-600 dark:text-stone-600 dark:hover:text-stone-400"
+            style={{
+              fontSize: '11px',
+              color: 'var(--muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              letterSpacing: '0.02em',
+              padding: '4px 0',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--ink)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
           >
             Новий чат
           </button>
         )}
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-5 py-8">
+      {/* Content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {isEmpty ? (
+          <Welcome onFile={() => fileRef.current?.click()} />
+        ) : (
+          <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
+            <div style={{ maxWidth: '560px', margin: '0 auto', padding: '28px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-          {isEmpty && (
-            <div className="flex flex-col items-center justify-center py-28 text-center animate-fade-in">
-              <p className="text-sm text-stone-400 dark:text-stone-500">
-                Завантажте документ або задайте питання
-              </p>
+              {messages.map((msg, i) => (
+                <div key={msg.id} style={{ animation: 'fade-up 0.35s ease-out forwards', animationDelay: `${Math.min(i * 25, 100)}ms`, opacity: 0 }}>
+                  <Bubble message={msg} />
+                </div>
+              ))}
+
+              {loading && (
+                <div style={{ animation: 'fade-in 0.2s ease-out forwards', opacity: 0 }}>
+                  {streaming ? (
+                    <p style={{ maxWidth: '85%', fontSize: '14px', lineHeight: '1.75', color: 'var(--ink-2)', margin: 0 }}>
+                      <Markdown text={streaming} />
+                    </p>
+                  ) : <TypingDots />}
+                </div>
+              )}
+
+              {error && (
+                <p style={{ fontSize: '12px', color: 'var(--error)', margin: 0, animation: 'fade-in 0.2s ease-out forwards', opacity: 0 }}>
+                  {error}
+                </p>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+          </div>
+        )}
+
+        {/* Input bar */}
+        <div style={{
+          flexShrink: 0,
+          borderTop: '1px solid var(--line)',
+          padding: `12px 16px max(14px, env(safe-area-inset-bottom)) 16px`,
+        }}>
+          <div style={{ maxWidth: '560px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+            {/* PDF button */}
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={loading}
+              title="Завантажити PDF"
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                flexShrink: 0,
+                borderRadius: '10px',
+                border: 'none',
+                background: 'none',
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                transition: 'color 0.15s',
+                opacity: loading ? 0.3 : 1,
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--ink)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+                <path d="M10 2v3h3" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              </svg>
+              {documentContext && (
+                <span style={{
+                  position: 'absolute',
+                  top: '6px',
+                  right: '6px',
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--doc-dot)',
+                }} />
+              )}
+            </button>
+
+            {/* Text input */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              borderRadius: '14px',
+              border: '1px solid var(--line)',
+              backgroundColor: 'var(--surface)',
+              padding: '10px 16px',
+            }}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+                placeholder={placeholder}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: '14px',
+                  color: 'var(--ink)',
+                  caretColor: 'var(--ink)',
+                  opacity: loading ? 0.4 : 1,
+                }}
+              />
+            </div>
+
+            {/* Send button */}
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                flexShrink: 0,
+                borderRadius: '10px',
+                border: 'none',
+                backgroundColor: 'var(--send-bg)',
+                cursor: input.trim() && !loading ? 'pointer' : 'default',
+                opacity: !input.trim() || loading ? 0.2 : 1,
+                transition: 'opacity 0.15s',
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M6.5 11V2M6.5 2L3 5.5M6.5 2L10 5.5" stroke="var(--send-fg)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+          </div>
+
+          {/* Active document name */}
+          {documentName && (
+            <div style={{ maxWidth: '560px', margin: '6px auto 0', paddingLeft: '2px' }}>
+              <span style={{ fontSize: '10px', color: 'var(--muted)', letterSpacing: '0.02em' }}>
+                {documentName}
+              </span>
             </div>
           )}
-
-          <div className="space-y-5">
-            {messages.map((msg) => (
-              <div key={msg.id} className="animate-fade-up">
-                <Bubble message={msg} />
-              </div>
-            ))}
-
-            {loading && (
-              <div className="animate-fade-in">
-                {streaming ? (
-                  <div className="max-w-[85%] text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                    <Markdown text={streaming} />
-                  </div>
-                ) : (
-                  <TypingDots />
-                )}
-              </div>
-            )}
-          </div>
-
-          {error && (
-            <p className="mt-4 text-sm text-amber-600 dark:text-amber-400 animate-fade-in">
-              {error}
-            </p>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-      </div>
-
-      {/* Input bar */}
-      <div className="shrink-0 border-t border-stone-100 px-5 py-4 dark:border-stone-800/60"
-           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-        <div className="mx-auto flex max-w-2xl items-center gap-2.5">
-
-          {/* PDF button */}
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={loading}
-            title="Завантажити PDF"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 disabled:opacity-30 dark:hover:bg-stone-800 dark:hover:text-stone-300"
-          >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <path d="M2.5 2h7l3 3v8.5H2.5V2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-              <path d="M9.5 2v3h3" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-            </svg>
-          </button>
-
-          {/* Text input */}
-          <div className={cn(
-            'flex flex-1 items-center rounded-2xl border px-4 py-2.5 transition-colors',
-            'border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900'
-          )}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSend()
-                }
-              }}
-              placeholder="Запитайте про документ..."
-              disabled={loading}
-              className="w-full bg-transparent text-sm text-stone-800 placeholder-stone-400 outline-none disabled:opacity-50 dark:text-stone-200 dark:placeholder-stone-600"
-            />
-          </div>
-
-          {/* Send button */}
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || loading}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-stone-900 text-stone-50 transition-opacity hover:opacity-80 disabled:opacity-20 dark:bg-stone-100 dark:text-stone-900"
-          >
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 11.5V1.5M6.5 1.5L2.5 5.5M6.5 1.5L10.5 5.5"
-                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-
         </div>
       </div>
 
@@ -331,12 +483,8 @@ export default function Home() {
         ref={fileRef}
         type="file"
         accept=".pdf,application/pdf"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) handleFile(file)
-          e.target.value = ''
-        }}
+        style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }}
       />
     </div>
   )

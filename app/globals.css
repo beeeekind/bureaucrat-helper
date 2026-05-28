@@ -4,48 +4,73 @@
 
 @layer base {
   :root {
-    --border: 30 8% 90%;
-    --muted: 30 6% 95%;
-    --muted-foreground: 30 5% 50%;
+    --bg:        #F7F6F3;
+    --ink:       #1C1B18;
+    --ink-2:     #3D3C39;
+    --muted:     #9A9890;
+    --faint:     #C8C6C0;
+    --line:      #E8E6E1;
+    --surface:   #FFFFFF;
+    --bubble-bg: #1C1B18;
+    --bubble-fg: #F7F6F3;
+    --dot:       #9A9890;
+    --send-bg:   #1C1B18;
+    --send-fg:   #F7F6F3;
+    --error:     #C4713A;
+    --doc-dot:   #5A9A6A;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --border: 30 5% 15%;
-      --muted: 30 5% 12%;
-      --muted-foreground: 30 4% 46%;
+      --bg:        #0F0E0C;
+      --ink:       #EEEDEA;
+      --ink-2:     #B8B6B0;
+      --muted:     #4A4844;
+      --faint:     #333230;
+      --line:      #242220;
+      --surface:   #1A1917;
+      --bubble-bg: #EEEDEA;
+      --bubble-fg: #1C1B18;
+      --dot:       #4A4844;
+      --send-bg:   #EEEDEA;
+      --send-fg:   #0F0E0C;
     }
-  }
-
-  * {
-    @apply border-border;
-    box-sizing: border-box;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
   }
 
   body {
-    @apply bg-stone-50 text-stone-900;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #111110;
-      color: #EDEDE9;
-    }
+  * {
+    box-sizing: border-box;
   }
 
   ::selection {
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: color-mix(in srgb, var(--ink) 10%, transparent);
   }
 
-  @media (prefers-color-scheme: dark) {
-    ::selection {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+  /* Animation keyframes */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.2; }
+    50%       { opacity: 0.8; }
   }
 }

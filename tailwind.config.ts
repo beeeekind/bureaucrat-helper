@@ -6,49 +6,50 @@ const config: Config = {
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
   ],
   theme: {
-    container: {
-      center: true,
-      padding: '2rem',
-      screens: { '2xl': '1400px' },
-    },
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+        // SVII brand palette - warm monochromatic
+        brand: {
+          bg:      '#F7F6F3',
+          'bg-dk': '#0F0E0C',
+          ink:     '#1C1B18',
+          'ink-dk':'#EEEDEA',
+          muted:   '#9A9890',
+          'muted-dk': '#4A4844',
+          line:    '#E8E6E1',
+          'line-dk': '#242220',
         },
       },
-      borderRadius: {
-        lg: '0.75rem',
-        md: '0.5rem',
-        sm: '0.375rem',
+      fontFamily: {
+        sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        brand: '0.16em',
       },
       keyframes: {
         'fade-up': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '0%':   { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         'fade-in': {
-          '0%': { opacity: '0' },
+          '0%':   { opacity: '0' },
           '100%': { opacity: '1' },
         },
         'pulse-dot': {
-          '0%, 100%': { opacity: '0.25' },
-          '50%': { opacity: '1' },
+          '0%, 100%': { opacity: '0.2' },
+          '50%':       { opacity: '0.8' },
         },
       },
       animation: {
-        'fade-up': 'fade-up 0.45s ease-out forwards',
-        'fade-in': 'fade-in 0.35s ease-out forwards',
-        'pulse-dot': 'pulse-dot 1.2s ease-in-out infinite',
+        'fade-up': 'fade-up 0.4s ease-out forwards',
+        'fade-in': 'fade-in 0.3s ease-out forwards',
+        'pulse-dot': 'pulse-dot 1.1s ease-in-out infinite',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [],
 }
 
 export default config
