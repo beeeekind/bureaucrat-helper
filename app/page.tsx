@@ -52,7 +52,7 @@ export default function Home() {
         const parsed = JSON.parse(cleaned) as AnalysisData
         setData(parsed)
       } catch {
-        setError('Отримано некоректну відповідь від сервера. Спробуйте ще раз.')
+        setError(`Відповідь сервера: ${accumulated.slice(0, 300)}`)
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
