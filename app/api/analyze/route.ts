@@ -31,29 +31,41 @@ export async function POST(request: Request) {
   // Truncate to avoid exceeding context limits
   const documentText = text.slice(0, 100_000)
 
-  const result = streamText({
-    model: anthropic('claude-sonnet-4-6'),
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: ANALYSIS_PROMPT.replace('{{DOCUMENT_TEXT}}', documentText),
-      },
-    ],
-  })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json({ error: 'missing_api_key' }, { status: 500 })
+  }
+
+  let result: ReturnType<typeof streamText>
+  try {
+    result = streamText({
+      model: anthropic('claude-sonnet-4-6'),
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: ANALYSIS_PROMPT.replace('{{DOCUMENT_TEXT}}', documentText),
+        },
+      ],
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return Response.json({ error: `stream_init_error: ${message}` }, { status: 500 })
+  }
 
   // Pipe the AI SDK text stream as a plain ReadableStream.
   // The client accumulates chunks and parses the complete JSON when done.
   const encoder = new TextEncoder()
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of result.textStream) {
-        controller.enqueue(encoder.encode(chunk))
+      try {
+        for await (const chunk of result.textStream) {
+          controller.enqueue(encoder.encode(chunk))
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        controller.enqueue(encoder.encode(`__STREAM_ERROR__:${message}`))
       }
       controller.close()
-    },
-    cancel() {
-      // Stream was cancelled by the client — nothing to clean up
     },
   })
 
