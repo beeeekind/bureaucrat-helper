@@ -48,7 +48,8 @@ export default function Home() {
       }
 
       try {
-        const parsed = JSON.parse(accumulated) as AnalysisData
+        const cleaned = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/,'').trim()
+        const parsed = JSON.parse(cleaned) as AnalysisData
         setData(parsed)
       } catch {
         setError('Отримано некоректну відповідь від сервера. Спробуйте ще раз.')
