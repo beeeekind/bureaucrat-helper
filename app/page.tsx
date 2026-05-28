@@ -113,7 +113,17 @@ function Bubble({ message }: { message: Message }) {
 
 // ─── Welcome ────────────────────────────────────────────────────────────────
 
-function Welcome({ onFile }: { onFile: () => void }) {
+function Welcome({ onFile, onDrop }: { onFile: () => void; onDrop: (file: File) => void }) {
+  const [hovered, setHovered] = useState(false)
+  const [dragging, setDragging] = useState(false)
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) onDrop(file)
+  }
+
   return (
     <div
       style={{
@@ -121,61 +131,66 @@ function Welcome({ onFile }: { onFile: () => void }) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        padding: '32px 20px 20px',
         gap: '20px',
-        padding: '24px',
-        textAlign: 'center',
         animation: 'fade-in 0.5s ease-out forwards',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-        <span
-          style={{
-            fontSize: '13px',
-            fontWeight: 500,
-            letterSpacing: '0.22em',
-            color: 'var(--ink)',
-          }}
-        >
-          SVII
-        </span>
-        <p style={{ fontSize: '13px', color: 'var(--muted)', maxWidth: '200px', lineHeight: '1.6', margin: 0 }}>
-          Ваш помічник з офіційними документами
-        </p>
-      </div>
+      {/* Subtitle top center */}
+      <p style={{
+        fontSize: '12px',
+        color: 'var(--muted)',
+        letterSpacing: '0.04em',
+        margin: 0,
+        textAlign: 'center',
+      }}>
+        Ваш помічник з офіційними документами
+      </p>
 
-      <button
+      {/* Big upload rectangle */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onFile}
+        onKeyDown={e => e.key === 'Enter' && onFile()}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => { setHovered(false); setDragging(false) }}
+        onDragOver={e => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false) }}
+        onDrop={handleDrop}
         style={{
-          marginTop: '4px',
-          display: 'inline-flex',
+          flex: 1,
+          width: '100%',
+          maxWidth: '560px',
+          display: 'flex',
           alignItems: 'center',
-          gap: '7px',
-          padding: '8px 16px',
-          borderRadius: '999px',
-          border: '1px solid var(--line)',
-          background: 'transparent',
-          color: 'var(--muted)',
-          fontSize: '12px',
+          justifyContent: 'center',
+          borderRadius: '20px',
+          border: `1.5px dashed ${dragging ? 'var(--faint)' : hovered ? 'var(--faint)' : 'var(--line)'}`,
+          backgroundColor: dragging ? 'color-mix(in srgb, var(--ink) 3%, transparent)' : hovered ? 'color-mix(in srgb, var(--ink) 2%, transparent)' : 'transparent',
           cursor: 'pointer',
-          transition: 'color 0.15s, border-color 0.15s',
-          letterSpacing: '0.01em',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.color = 'var(--ink)'
-          e.currentTarget.style.borderColor = 'var(--faint)'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.color = 'var(--muted)'
-          e.currentTarget.style.borderColor = 'var(--line)'
+          transition: 'border-color 0.2s, background-color 0.2s',
+          outline: 'none',
+          minHeight: '200px',
         }}
       >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2 1.5h5.5l2.5 2.5V10.5H2V1.5z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
-          <path d="M7.5 1.5v2.5h2.5" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
-        </svg>
-        Завантажити PDF
-      </button>
+        <p style={{
+          fontSize: '15px',
+          color: hovered || dragging ? 'var(--ink-2)' : 'var(--muted)',
+          textAlign: 'center',
+          padding: '0 24px',
+          margin: 0,
+          transition: 'color 0.2s',
+          lineHeight: '1.5',
+          userSelect: 'none',
+        }}>
+          {dragging
+            ? 'Відпустіть - розберемося'
+            : hovered
+            ? 'Завантажте PDF або перетягніть сюди'
+            : 'Що цей документ від мене хоче?'}
+        </p>
+      </div>
     </div>
   )
 }
@@ -330,7 +345,7 @@ export default function Home() {
       {/* Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {isEmpty ? (
-          <Welcome onFile={() => fileRef.current?.click()} />
+          <Welcome onFile={() => fileRef.current?.click()} onDrop={handleFile} />
         ) : (
           <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
             <div style={{ maxWidth: '560px', margin: '0 auto', padding: '28px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
