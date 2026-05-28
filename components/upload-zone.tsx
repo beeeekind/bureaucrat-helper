@@ -87,11 +87,11 @@ export function UploadZone({ onFileSelect, isLoading }: UploadZoneProps) {
         onMouseLeave={() => setIsHovering(false)}
         className={cn(
           'flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-2xl',
-          'transition-all duration-300 focus-visible:outline-none focus-visible:ring-2',
-          'focus-visible:ring-stone-400 focus-visible:ring-offset-2',
+          'border border-dashed transition-all duration-300',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2',
           isDragging
-            ? 'bg-stone-100 dark:bg-stone-800/40'
-            : 'hover:bg-stone-100/60 dark:hover:bg-stone-900/40',
+            ? 'border-stone-400 bg-stone-100 dark:border-stone-600 dark:bg-stone-800/40'
+            : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-800 dark:hover:border-stone-700 dark:hover:bg-stone-900/30',
           isLoading ? 'cursor-not-allowed opacity-30' : 'cursor-pointer'
         )}
       >
