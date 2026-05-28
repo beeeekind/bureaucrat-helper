@@ -174,22 +174,33 @@ function Welcome({ onFile, onDrop }: { onFile: () => void; onDrop: (file: File) 
           minHeight: '200px',
         }}
       >
-        <p style={{
-          fontSize: '15px',
-          color: hovered || dragging ? 'var(--ink-2)' : 'var(--muted)',
-          textAlign: 'center',
-          padding: '0 24px',
-          margin: 0,
-          transition: 'color 0.2s',
-          lineHeight: '1.5',
-          userSelect: 'none',
-        }}>
-          {dragging
-            ? 'Відпустіть - розберемося'
-            : hovered
-            ? 'Завантажте PDF або перетягніть сюди'
-            : 'Що цей документ від мене хоче?'}
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '0 24px' }}>
+          <p style={{
+            fontSize: '15px',
+            color: hovered || dragging ? 'var(--ink-2)' : 'var(--muted)',
+            textAlign: 'center',
+            margin: 0,
+            transition: 'color 0.2s',
+            lineHeight: '1.5',
+            userSelect: 'none',
+          }}>
+            {dragging
+              ? 'Відпустіть - розберемося'
+              : hovered
+              ? 'Натисніть або перетягніть PDF'
+              : 'Що цей документ від вас хоче?'}
+          </p>
+          <p style={{
+            fontSize: '11px',
+            color: 'var(--faint)',
+            margin: 0,
+            userSelect: 'none',
+            transition: 'opacity 0.2s',
+            opacity: dragging ? 0 : 1,
+          }}>
+            до 10 МБ
+          </p>
+        </div>
       </div>
     </div>
   )
