@@ -127,7 +127,7 @@ function Welcome({ onFile, onDrop }: { onFile: () => void; onDrop: (file: File) 
   return (
     <div
       style={{
-        flex: 1,
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         padding: '20px',
@@ -351,9 +351,11 @@ export default function Home() {
       )}
 
       {/* Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         {isEmpty ? (
-          <Welcome onFile={() => fileRef.current?.click()} onDrop={handleFile} />
+          <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+            <Welcome onFile={() => fileRef.current?.click()} onDrop={handleFile} />
+          </div>
         ) : (
           <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
             <div style={{ maxWidth: '560px', margin: '0 auto', padding: '28px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
