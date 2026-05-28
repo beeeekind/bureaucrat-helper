@@ -317,16 +317,9 @@ export default function Home() {
         borderBottom: '1px solid var(--line)',
         flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: 'var(--ink)' }}>
-            SVII
-          </span>
-          {isEmpty && (
-            <span style={{ fontSize: '11px', color: 'var(--muted)', letterSpacing: '0.01em' }}>
-              Ваш помічник з офіційними документами
-            </span>
-          )}
-        </div>
+        <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: 'var(--ink)' }}>
+          SVII
+        </span>
         {!isEmpty && (
           <button
             onClick={handleReset}
@@ -347,6 +340,15 @@ export default function Home() {
           </button>
         )}
       </header>
+
+      {/* Subtitle under header line */}
+      {isEmpty && (
+        <div style={{ padding: '14px 20px 0', flexShrink: 0 }}>
+          <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0, letterSpacing: '0.01em' }}>
+            Ваш помічник з офіційними документами
+          </p>
+        </div>
+      )}
 
       {/* Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
