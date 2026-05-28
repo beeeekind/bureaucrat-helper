@@ -130,23 +130,11 @@ function Welcome({ onFile, onDrop }: { onFile: () => void; onDrop: (file: File) 
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        padding: '32px 20px 20px',
-        gap: '20px',
+        padding: '20px',
+        gap: '16px',
         animation: 'fade-in 0.5s ease-out forwards',
       }}
     >
-      {/* Subtitle top center */}
-      <p style={{
-        fontSize: '12px',
-        color: 'var(--muted)',
-        letterSpacing: '0.04em',
-        margin: 0,
-        textAlign: 'center',
-      }}>
-        Ваш помічник з офіційними документами
-      </p>
-
       {/* Big upload rectangle */}
       <div
         role="button"
@@ -162,16 +150,16 @@ function Welcome({ onFile, onDrop }: { onFile: () => void; onDrop: (file: File) 
           flex: 1,
           width: '100%',
           maxWidth: '560px',
+          margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '20px',
-          border: `1.5px dashed ${dragging ? 'var(--faint)' : hovered ? 'var(--faint)' : 'var(--line)'}`,
-          backgroundColor: dragging ? 'color-mix(in srgb, var(--ink) 3%, transparent)' : hovered ? 'color-mix(in srgb, var(--ink) 2%, transparent)' : 'transparent',
+          borderRadius: '16px',
+          border: `1px solid ${dragging || hovered ? 'var(--faint)' : 'var(--line)'}`,
+          backgroundColor: dragging || hovered ? 'color-mix(in srgb, var(--ink) 2%, transparent)' : 'transparent',
           cursor: 'pointer',
           transition: 'border-color 0.2s, background-color 0.2s',
           outline: 'none',
-          minHeight: '200px',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '0 24px' }}>
@@ -329,9 +317,16 @@ export default function Home() {
         borderBottom: '1px solid var(--line)',
         flexShrink: 0,
       }}>
-        <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: 'var(--ink)' }}>
-          SVII
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.2em', color: 'var(--ink)' }}>
+            SVII
+          </span>
+          {isEmpty && (
+            <span style={{ fontSize: '11px', color: 'var(--muted)', letterSpacing: '0.01em' }}>
+              Ваш помічник з офіційними документами
+            </span>
+          )}
+        </div>
         {!isEmpty && (
           <button
             onClick={handleReset}
