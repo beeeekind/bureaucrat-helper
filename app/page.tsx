@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { UploadZone } from '@/components/upload-zone'
 import { AnalysisView } from '@/components/analysis-view'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { AnalysisData } from '@/lib/types'
 
 export default function Home() {
@@ -31,12 +30,12 @@ export default function Home() {
           no_file: 'Файл не було передано. Спробуйте ще раз.',
           no_text: 'Цей PDF не містить тексту. Можливо, це скан — підтримка сканів додається пізніше.',
           parse_error: 'Не вдалося прочитати PDF. Файл може бути пошкоджений або зашифрований.',
+          missing_api_key: 'Сервер не налаштований. Зверніться до адміністратора.',
         }
-        setError(messages[errData.error] ?? `Невідома помилка: ${errData.error}`)
+        setError(messages[errData.error] ?? `Помилка: ${errData.error}`)
         return
       }
 
-      // Read the plain-text stream and accumulate into a single JSON string
       const reader = response.body!.getReader()
       const decoder = new TextDecoder()
       let accumulated = ''
@@ -48,7 +47,10 @@ export default function Home() {
       }
 
       try {
-        const cleaned = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/,'').trim()
+        const cleaned = accumulated
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```$/, '')
+          .trim()
         const parsed = JSON.parse(cleaned) as AnalysisData
         setData(parsed)
       } catch {
@@ -68,38 +70,52 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-4xl px-6 py-16">
-        <header className="mb-12">
-          <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900">
-            Бюрократ-хелпер
-          </h1>
-          <p className="text-lg text-slate-500">
-            Завантажте офіційний документ — отримайте людське пояснення.
-          </p>
-        </header>
+    <main className="min-h-screen bg-stone-50 dark:bg-[#111110]">
+      <div className="mx-auto max-w-2xl px-6 py-16 md:py-24">
 
+        {/* Header — hidden once results are shown */}
+        {!data && (
+          <header className="mb-14 animate-fade-up">
+            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-[11px] font-medium text-stone-500 dark:text-stone-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              beta
+            </div>
+            <h1 className="text-[2rem] font-medium leading-tight tracking-tight text-stone-900 dark:text-stone-50">
+              Бюрократ-хелпер
+            </h1>
+            <p className="mt-2.5 text-base leading-relaxed text-stone-500 dark:text-stone-400">
+              Завантажте офіційний документ — отримайте людське пояснення.
+            </p>
+          </header>
+        )}
+
+        {/* Error */}
         {error && (
-          <Alert className="mb-8 border-amber-200 bg-amber-50">
-            <AlertDescription className="text-amber-800">{error}</AlertDescription>
-          </Alert>
+          <div className="mb-10 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 dark:border-amber-800/20 dark:bg-amber-950/20">
+            <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+          </div>
         )}
 
+        {/* Upload */}
         {!data && !loading && (
-          <UploadZone onFileSelect={handleFileSelect} isLoading={loading} />
+          <div className="animate-fade-up" style={{ animationDelay: '80ms' }}>
+            <UploadZone onFileSelect={handleFileSelect} isLoading={loading} />
+          </div>
         )}
 
+        {/* Analysis */}
         {(loading || data) && (
           <AnalysisView data={data ?? undefined} loading={loading} />
         )}
 
+        {/* Reset */}
         {data && (
-          <div className="mt-10 text-center">
+          <div className="mt-16 text-center">
             <button
               onClick={handleReset}
-              className="text-sm text-slate-400 transition-colors hover:text-slate-600"
+              className="text-xs text-stone-400 transition-colors hover:text-stone-600 dark:text-stone-600 dark:hover:text-stone-400"
             >
-              Проаналізувати інший документ
+              ← Проаналізувати інший документ
             </button>
           </div>
         )}

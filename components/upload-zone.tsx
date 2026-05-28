@@ -1,13 +1,14 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 interface UploadZoneProps {
   onFileSelect: (file: File) => void
   isLoading: boolean
 }
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB
+const MAX_SIZE_BYTES = 10 * 1024 * 1024
 
 export function UploadZone({ onFileSelect, isLoading }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false)
@@ -21,7 +22,7 @@ export function UploadZone({ onFileSelect, isLoading }: UploadZoneProps) {
         return
       }
       if (file.size > MAX_SIZE_BYTES) {
-        setValidationError('Файл занадто великий. Максимальний розмір — 10 МБ.')
+        setValidationError('Файл занадто великий. Максимум — 10 МБ.')
         return
       }
       setValidationError(null)
@@ -45,21 +46,16 @@ export function UploadZone({ onFileSelect, isLoading }: UploadZoneProps) {
     setIsDragging(true)
   }, [])
 
-  const handleDragLeave = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      // Only clear drag state when leaving the zone itself, not child elements
-      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-        setIsDragging(false)
-      }
-    },
-    []
-  )
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false)
+    }
+  }, [])
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (file) handleFile(file)
-      // Reset input so the same file can be re-selected
       e.target.value = ''
     },
     [handleFile]
@@ -80,28 +76,63 @@ export function UploadZone({ onFileSelect, isLoading }: UploadZoneProps) {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={[
-          'flex flex-col items-center justify-center gap-4',
-          'rounded-xl border-2 border-dashed px-8 py-20',
-          'transition-colors duration-150',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        className={cn(
+          'group relative flex min-h-[260px] flex-col items-center justify-center gap-5',
+          'rounded-2xl border border-dashed transition-all duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2',
           isDragging
-            ? 'border-slate-400 bg-slate-100'
-            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
-          isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
-        ].join(' ')}
+            ? 'border-stone-400 bg-stone-100 dark:border-stone-500 dark:bg-stone-800/30'
+            : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-800 dark:hover:border-stone-700 dark:hover:bg-stone-900/40',
+          isLoading ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
+        )}
       >
-        <div className="flex flex-col items-center gap-2 text-center">
-          <p className="text-lg text-slate-600">
-            Перетягніть PDF-файл сюди
-          </p>
-          <p className="text-sm text-slate-400">або натисніть для вибору</p>
+        {/* Icon */}
+        <div
+          className={cn(
+            'flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200',
+            'bg-stone-100 dark:bg-stone-800',
+            !isLoading && 'group-hover:scale-110'
+          )}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            className="text-stone-500 dark:text-stone-400"
+          >
+            <path
+              d="M9 12V3M9 3L5.5 6.5M9 3L12.5 6.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2 13V15C2 15.5523 2.44772 16 3 16H15C15.5523 16 16 15.5523 16 15V13"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
-        <p className="text-xs text-slate-300">Максимальний розмір: 10 МБ</p>
+
+        {/* Text */}
+        <div className="text-center">
+          <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
+            Перетягніть PDF сюди
+          </p>
+          <p className="mt-1 text-sm text-stone-400 dark:text-stone-500">
+            або{' '}
+            <span className="underline underline-offset-2">оберіть файл</span>
+          </p>
+        </div>
+
+        <p className="text-xs text-stone-300 dark:text-stone-600">до 10 МБ</p>
       </div>
 
       {validationError && (
-        <p className="mt-3 text-sm text-red-600">{validationError}</p>
+        <p className="mt-3 text-sm text-red-500 dark:text-red-400">{validationError}</p>
       )}
 
       <input
