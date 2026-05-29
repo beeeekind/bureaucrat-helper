@@ -20,11 +20,6 @@ function MoonIcon() {
   )
 }
 
-const TAGLINE: Record<Lang, string> = {
-  uk: 'Ваш бюрократ помічник',
-  en: 'Your bureaucracy assistant',
-}
-
 const LANG_TOGGLE: Record<Lang, string> = {
   uk: 'EN',
   en: 'УКР',
@@ -35,42 +30,28 @@ export function SiteHeader() {
 
   return (
     <header style={{
+      height: '52px',
       flexShrink: 0,
       borderBottom: '1px solid var(--border)',
       display: 'flex',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '16px 24px 14px',
+      padding: '0 24px',
       position: 'relative',
       zIndex: 10,
     }}>
 
-      {/* Logo + tagline — left column */}
-      <div>
-        <span style={{
-          display: 'block',
-          fontSize: '11px',
-          fontWeight: 500,
-          letterSpacing: '0.22em',
-          color: 'var(--text-2)',
-          textTransform: 'uppercase',
-          lineHeight: 1,
-        }}>
-          S V I I
-        </span>
-        <span style={{
-          display: 'block',
-          fontSize: '11px',
-          color: 'var(--text-3)',
-          marginTop: '4px',
-          lineHeight: 1,
-        }}>
-          {TAGLINE[lang]}
-        </span>
-      </div>
+      <span style={{
+        fontSize: '11px',
+        fontWeight: 500,
+        letterSpacing: '0.22em',
+        color: 'var(--text-2)',
+        textTransform: 'uppercase',
+      }}>
+        S V I I
+      </span>
 
-      {/* Controls — right column, aligned to first line of logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '1px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
           onClick={toggleLang}
           style={{
@@ -92,7 +73,6 @@ export function SiteHeader() {
             width: 28, height: 28,
             color: 'var(--text-3)', background: 'none', border: 'none',
             cursor: 'pointer', transition: 'color 0.28s ease',
-            marginTop: '-7px',
           }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-2)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-3)')}

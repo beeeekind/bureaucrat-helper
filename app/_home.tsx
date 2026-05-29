@@ -852,6 +852,10 @@ export default function App() {
     return (
       <main style={{ flex: 1, background: 'var(--bg)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
         <ParticleField dark={dark} />
+        {/* Tagline — sits directly below the header border, left-aligned */}
+        <div style={{ position: 'relative', zIndex: 1, padding: '14px 24px 0', opacity: 0, animation: 'fade-in 0.9s ease 0.04s both' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t.tagline}</span>
+        </div>
         <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '10vh' }}>
           <div className="animate-slide-up" style={{ width: '100%', maxWidth: '560px', padding: '0 24px' }}>
 
