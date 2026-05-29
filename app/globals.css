@@ -3,74 +3,293 @@
 @tailwind utilities;
 
 @layer base {
+  /* ─── Light mode ──────────────────────────────────────────────── */
   :root {
-    --bg:        #F7F6F3;
-    --ink:       #1C1B18;
-    --ink-2:     #3D3C39;
-    --muted:     #9A9890;
-    --faint:     #C8C6C0;
-    --line:      #E8E6E1;
-    --surface:   #FFFFFF;
-    --bubble-bg: #1C1B18;
-    --bubble-fg: #F7F6F3;
-    --dot:       #9A9890;
-    --send-bg:   #1C1B18;
-    --send-fg:   #F7F6F3;
-    --error:     #C4713A;
-    --doc-dot:   #5A9A6A;
+    --bg:      #F5F3EE;
+    --bg-1:    #EDEAE4;
+    --bg-2:    #E5E2DC;
+    --bg-3:    #DEDAD3;
+    --text-1:  #1A1814;
+    --text-2:  #6B6865;
+    --text-3:  #A8A5A2;
+    --accent:  #C4A882;
+    --ok:      #5A8A62;
+    --err:     #B85A55;
+    --border:  rgba(0,0,0,0.08);
+    --border-2: rgba(0,0,0,0.12);
+    --upload-border: rgba(0,0,0,0.10);
+    --upload-hover-border: rgba(0,0,0,0.18);
+    --upload-hover-bg: rgba(0,0,0,0.02);
+
+    /* Semantic role tokens */
+    --danger:     #B85A55;
+    --danger-bg:  rgba(184, 90, 85, 0.07);
+    --success:    #4A7E5C;
+    --success-bg: rgba(74, 126, 92, 0.08);
+    --warning:    #A07838;
+    --warning-bg: rgba(160, 120, 56, 0.08);
+
+    /* Floating surface */
+    --surface:      #F0EDE7;
+    --float-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 6px 20px rgba(0,0,0,0.06);
+
+    /* Analyzing screen */
+    --analyzing-glow-color: rgba(196, 168, 130, 1);
+    --analyzing-layer-a:    #EDEAE4;
+    --analyzing-layer-b:    #E5E2DC;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:        #0F0E0C;
-      --ink:       #EEEDEA;
-      --ink-2:     #B8B6B0;
-      --muted:     #4A4844;
-      --faint:     #333230;
-      --line:      #242220;
-      --surface:   #1A1917;
-      --bubble-bg: #EEEDEA;
-      --bubble-fg: #1C1B18;
-      --dot:       #4A4844;
-      --send-bg:   #EEEDEA;
-      --send-fg:   #0F0E0C;
-    }
+  /* ─── Dark mode ───────────────────────────────────────────────── */
+  .dark {
+    --bg:      #232120;
+    --bg-1:    #1D1B18;
+    --bg-2:    #181614;
+    --bg-3:    #131110;
+    --text-1:  #EDE9E2;
+    --text-2:  #8A8680;
+    --text-3:  #4A4744;
+    --accent:  #C4A882;
+    --ok:      #6BA374;
+    --err:     #C86A66;
+    --border:  rgba(255,255,255,0.06);
+    --border-2: rgba(255,255,255,0.10);
+    --upload-border: rgba(255,255,255,0.06);
+    --upload-hover-border: rgba(255,255,255,0.12);
+    --upload-hover-bg: rgba(255,255,255,0.02);
+
+    /* Semantic role tokens */
+    --danger:     #C86A66;
+    --danger-bg:  rgba(200, 106, 102, 0.08);
+    --success:    #5A9E7A;
+    --success-bg: rgba(90, 158, 122, 0.09);
+    --warning:    #C9943A;
+    --warning-bg: rgba(201, 148, 58, 0.07);
+
+    /* Floating surface — darker than bg for inset depth */
+    --surface:      #1E1C19;
+    --float-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 8px 28px rgba(0,0,0,0.38);
+
+    /* Analyzing screen */
+    --analyzing-glow-color: rgba(196, 168, 130, 1);
+    --analyzing-layer-a:    #1D1B18;
+    --analyzing-layer-b:    #181614;
   }
 
+  /* ─── Base ────────────────────────────────────────────────────── */
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
   }
-
   body {
     background-color: var(--bg);
-    color: var(--ink);
+    color: var(--text-1);
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
   }
+  * { box-sizing: border-box; }
+  ::selection { background-color: rgba(196, 168, 130, 0.2); }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--text-3); border-radius: 2px; }
 
-  * {
-    box-sizing: border-box;
-  }
-
-  ::selection {
-    background-color: color-mix(in srgb, var(--ink) 10%, transparent);
-  }
-
-  /* Animation keyframes */
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
+  /* ─── Keyframes ───────────────────────────────────────────────── */
   @keyframes fade-in {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); filter: blur(0.5px); }
+    to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  }
+  /* Inline text / dynamic content: same philosophy, tuned for text size */
+  @keyframes text-appear {
+    from { opacity: 0; transform: translateY(4px); filter: blur(0.28px); }
+    to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  }
 
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 0.2; }
-    50%       { opacity: 0.8; }
+  /* Editorial section reveal */
+  @keyframes section-appear {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+      filter: blur(0.35px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  /* Analyzing screen */
+  @keyframes glow-breathe {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.05; }
+    50%       { transform: translate(-50%, -50%) scale(1.28); opacity: 0.11; }
+  }
+  @keyframes status-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Typing cursor */
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+}
+
+/* ─── Editorial layout ────────────────────────────────────────── */
+
+/* All sections start hidden */
+.editorial-layout .e-section {
+  opacity: 0;
+  will-change: opacity, transform, filter;
+}
+
+/* Once .revealed is added, cascade fires via CSS custom property */
+.editorial-layout.revealed .e-section {
+  animation: section-appear 1.45s cubic-bezier(0.30, 0, 0.36, 1)
+             var(--reveal-delay, 0s) forwards;
+}
+
+/* Floating surface card */
+.e-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: var(--float-shadow);
+}
+
+/* Risks card: same surface, subtle danger tint */
+.e-card-risk {
+  background: var(--danger-bg);
+  border-radius: 20px;
+  padding: 28px 28px;
+  box-shadow: var(--float-shadow);
+}
+
+/* Section label — sentence case, soft */
+.e-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  color: var(--text-3);
+  display: block;
+  margin-bottom: 14px;
+}
+
+/* Deadlines + actions two-column layout */
+.editorial-pair {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 580px) {
+  .editorial-pair { grid-template-columns: 1fr; }
+}
+
+/* ─── Welcome screen entry ───────────────────────────────────── */
+.animate-slide-up {
+  opacity: 0;
+  will-change: opacity, transform, filter;
+  animation: slide-up 1.1s cubic-bezier(0.30, 0, 0.36, 1) 0.08s forwards;
+}
+
+/* ─── Cinematic text entry — inline text, dynamic content ─────── */
+/* Use on any text that appears after the initial load.            */
+/* Three natural tiers:                                            */
+/*   sections  → section-appear  1.45s  (whole blocks)            */
+/*   content   → text-appear     0.65s  (inline text, labels)     */
+/*   hover     → text-appear     0.32s  (interactive, key-driven) */
+.text-appear {
+  opacity: 0;
+  will-change: opacity, transform, filter;
+  animation: text-appear 0.65s cubic-bezier(0.30, 0, 0.36, 1) forwards;
+}
+
+/* ─── Typing cursor ───────────────────────────────────────────── */
+.typing-cursor {
+  display: inline-block;
+  width: 1.5px;
+  height: 0.85em;
+  background: var(--text-3);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: cursor-blink 0.9s step-end infinite;
+}
+
+/* ─── Analyzing screen ────────────────────────────────────────── */
+.analyzing-screen {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.analyzing-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 100%, var(--analyzing-layer-a) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 40% at 10% 5%,   var(--analyzing-layer-b) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.analyzing-glow {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%) scale(1);
+  background: radial-gradient(circle, var(--analyzing-glow-color) 0%, transparent 65%);
+  opacity: 0.06;
+  animation: glow-breathe 9s ease-in-out infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 0;
+}
+
+.analyzing-content {
+  position: relative;
+  z-index: 1;
+}
+
+.analyzing-status {
+  animation: status-enter 0.72s cubic-bezier(0.30, 0, 0.36, 1) forwards;
+  opacity: 0;
+  display: block;
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .analyzing-glow,
+  .analyzing-status,
+  .typing-cursor {
+    animation: none !important;
+  }
+  .analyzing-status { opacity: 1; }
+  .typing-cursor    { opacity: 1; }
+
+  /* All reveal animations: opacity only, no blur or movement */
+  .animate-slide-up { animation: fade-in 0.5s ease forwards !important; }
+  .text-appear      { animation: fade-in 0.3s ease forwards !important; }
+
+  @keyframes section-appear {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes text-appear {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 }

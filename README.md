@@ -86,6 +86,12 @@ pnpm build && pnpm start
 
 > `.env.local` не потрапляє на Vercel - env-змінні треба вносити вручну через UI або [Vercel CLI](https://vercel.com/docs/cli): `vercel env add ANTHROPIC_API_KEY`.
 
+## Project conventions
+
+- **No dashes** (em dash `—`, en dash `–`) anywhere in the codebase or AI output. Use a comma, colon, or new sentence instead. The system prompt instructs the model accordingly; `lib/sanitize.ts` strips any that slip through. All future features must inherit this convention.
+- **Semantic color tokens**: use `--danger` for consequences/risks, `--success` for positive signals. Never hardcode red/green hex values.
+- **No skeletons**: the analyzing screen handles all loading states. No skeleton cards, no spinners.
+
 ## Project structure
 
 ```

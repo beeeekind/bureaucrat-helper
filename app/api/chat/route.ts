@@ -1,6 +1,6 @@
 import { streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
-import { CHAT_SYSTEM_PROMPT } from '@/lib/prompts'
+import { CHAT_SYSTEM_PROMPT_UK, CHAT_SYSTEM_PROMPT_EN } from '@/lib/prompts'
 
 export const runtime = 'nodejs'
 
@@ -9,14 +9,17 @@ export async function POST(request: Request) {
     return Response.json({ error: 'missing_api_key' }, { status: 500 })
   }
 
-  const { messages, documentContext } = await request.json() as {
+  const { messages, documentContext, lang } = await request.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[]
     documentContext?: string
+    lang?: 'uk' | 'en'
   }
 
+  const base = lang === 'en' ? CHAT_SYSTEM_PROMPT_EN : CHAT_SYSTEM_PROMPT_UK
+  const docLabel = lang === 'en' ? 'USER DOCUMENT' : 'ДОКУМЕНТ КОРИСТУВАЧА'
   const systemPrompt = documentContext
-    ? `${CHAT_SYSTEM_PROMPT}\n\n---\nДОКУМЕНТ КОРИСТУВАЧА:\n${documentContext}`
-    : CHAT_SYSTEM_PROMPT
+    ? `${base}\n\n---\n${docLabel}:\n${documentContext}`
+    : base
 
   const result = streamText({
     model: anthropic('claude-sonnet-4-6'),
