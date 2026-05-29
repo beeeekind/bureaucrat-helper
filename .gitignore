@@ -20,3 +20,9 @@ dist/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Capacitor iOS — generated artefacts that don't need version control
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/DerivedData/
