@@ -68,6 +68,9 @@ const T = {
     labelSteps:    'Наступні кроки',
     labelCheck:    'Що варто перевірити',
     labelSources:  'Офіційні джерела',
+    cameraLabel:   'Сфотографувати',
+    galleryLabel:  'Обрати з бібліотеки',
+    errCancelled:  null,
     errPdfOnly:    'Підтримуються PDF, JPG та PNG.',
     errTooLarge:   'Максимум 10 МБ.',
     errNoText:     'Цей PDF не містить тексту. Можливо, це скан без текстового шару.',
@@ -94,6 +97,9 @@ const T = {
     labelSteps:    'Next steps',
     labelCheck:    'Unclear points',
     labelSources:  'Official sources',
+    cameraLabel:   'Take photo',
+    galleryLabel:  'Choose from library',
+    errCancelled:  null,
     errPdfOnly:    'Only PDF, JPG, and PNG files are supported.',
     errTooLarge:   'File is too large. Maximum 10 MB.',
     errNoText:     'This PDF has no text layer. It may be a scanned document.',
@@ -693,6 +699,8 @@ export default function App() {
   const [hovered,      setHovered]      = useState(false)
   const [dragging,     setDragging]     = useState(false)
 
+  const [isNative,    setIsNative]    = useState(false)
+
   const fileRef      = useRef<HTMLInputElement>(null)
   const lastStageAt  = useRef(Date.now())
   const stagePending = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -752,6 +760,14 @@ export default function App() {
     prevStreaming.current = isStreaming
   }, [isStreaming, object, phase])
 
+  // ── Native platform detection ─────────────────────────────────
+
+  useEffect(() => {
+    import('@capacitor/core').then(({ Capacitor }) => {
+      setIsNative(Capacitor.isNativePlatform())
+    }).catch(() => {})
+  }, [])
+
   // ── Cleanup ───────────────────────────────────────────────────
 
   useEffect(() => () => {
@@ -783,6 +799,43 @@ export default function App() {
     setDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) handleFile(file)
+  }
+
+  async function mediaResultToFile(webPath: string): Promise<File> {
+    const { Capacitor } = await import('@capacitor/core')
+    const url = Capacitor.convertFileSrc(webPath)
+    const resp = await fetch(url)
+    const blob = await resp.blob()
+    const ext = webPath.split('.').pop()?.toLowerCase() ?? 'jpg'
+    const mime = blob.type || `image/${ext === 'jpg' ? 'jpeg' : ext}`
+    return new File([blob], `photo.${ext}`, { type: mime })
+  }
+
+  async function handleCamera() {
+    try {
+      const { Camera } = await import('@capacitor/camera')
+      const result = await Camera.takePhoto({ quality: 90 })
+      if (!result.webPath) return
+      handleFile(await mediaResultToFile(result.webPath))
+    } catch (e: unknown) {
+      const msg = String((e as { errorMessage?: string })?.errorMessage ?? e)
+      if (/cancel/i.test(msg)) return
+      setError(t.errUpload)
+    }
+  }
+
+  async function handleGallery() {
+    try {
+      const { Camera } = await import('@capacitor/camera')
+      const result = await Camera.chooseFromGallery({ quality: 90 })
+      const photo = result.results?.[0]
+      if (!photo?.webPath) return
+      handleFile(await mediaResultToFile(photo.webPath))
+    } catch (e: unknown) {
+      const msg = String((e as { errorMessage?: string })?.errorMessage ?? e)
+      if (/cancel/i.test(msg)) return
+      setError(t.errUpload)
+    }
   }
 
   const t = T[lang]
@@ -895,6 +948,31 @@ export default function App() {
                 <span className="text-appear" style={{ fontSize: '11px', color: 'var(--text-3)', letterSpacing: '0.04em' }}>{t.uploadSize}</span>
               )}
             </div>
+
+            {isNative && (
+              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                <button
+                  onClick={handleCamera}
+                  style={{
+                    flex: 1, height: '48px', border: '1px solid var(--upload-border)',
+                    borderRadius: '12px', background: 'none', color: 'var(--text-2)',
+                    fontSize: '14px', cursor: 'pointer', letterSpacing: '-0.01em',
+                  }}
+                >
+                  {t.cameraLabel}
+                </button>
+                <button
+                  onClick={handleGallery}
+                  style={{
+                    flex: 1, height: '48px', border: '1px solid var(--upload-border)',
+                    borderRadius: '12px', background: 'none', color: 'var(--text-2)',
+                    fontSize: '14px', cursor: 'pointer', letterSpacing: '-0.01em',
+                  }}
+                >
+                  {t.galleryLabel}
+                </button>
+              </div>
+            )}
 
             {error && (
               <p key={error} className="text-appear" style={{ fontSize: '13px', color: 'var(--danger)', textAlign: 'center', margin: '16px 0 0', lineHeight: '1.5' }}>{error}</p>
